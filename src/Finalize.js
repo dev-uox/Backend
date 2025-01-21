@@ -33,7 +33,9 @@ const sendEmails = async (userDetails, paymentMethod, amount, planId) => {
     subject: "Payment Confirmation",
     text: `Dear ${userDetails.name},
 
-Your payment of ₹${amount / 100} for plan ID: ${planId} using ${paymentMethod} has been successful.
+Your payment of ₹${amount * 100} for plan ID: ${planId} using ${paymentMethod} has been successful.
+
+Feel free to reach out us at :- contact@vahlayastro.com
 
 Thank you for your purchase!
 
@@ -48,7 +50,7 @@ EMI Payment Team`,
     text: `A new payment has been received:
 
 Payment Method: ${paymentMethod}
-Amount: ₹${amount / 100}
+Amount: ₹${amount * 100}
 Plan ID: ${planId}
 User Details: ${JSON.stringify(userDetails, null, 2)}
 
@@ -83,7 +85,7 @@ router.post("/success", async (req, res) => {
         <li>Amount Paid: ₹${amount}</li>
         <li>Payment ID: ${paymentId}</li>
       </ul>
-      <p>If you have any questions, feel free to contact us.</p>
+      <p>If you have any questions, feel free to contact us. contact@vahlayastro.com </p>
     `;
 
     const adminMessage = `
@@ -141,7 +143,7 @@ router.post("/final/success", async (req, res) => {
       <ul>
         ${emiDetails.map((emi) => `<li>EMI #${emi.emiNumber}: ₹${emi.amount}</li>`).join("")}
       </ul>
-      <p>If you have any questions, feel free to contact us.</p>
+      <p>If you have any questions, feel free to contact us. contact@vahlayastro.com </p>
     `;
 
     const adminMessage = `
