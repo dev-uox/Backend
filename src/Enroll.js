@@ -40,7 +40,9 @@ const sendEmails = async (userDetails, paymentMethod, amount, courseId) => {
     subject: "Payment Confirmation",
     text: `Dear ${userDetails.name},
 
-Your payment of ₹${amount / 100} for course ID: ${courseId} using ${paymentMethod} has been successful.
+Your payment of ₹${amount * 100} for course ID: ${courseId} using ${paymentMethod} has been successful.
+
+Feel free to reach out us at contact@vahlayastro.com
 
 Thank you for your purchase!
 
@@ -55,7 +57,7 @@ Astrology Course Team`,
     text: `A new payment has been received:
 
 Payment Method: ${paymentMethod}
-Amount: ₹${amount / 100}
+Amount: ₹${amount * 100}
 Course ID: ${courseId}
 User Details: ${JSON.stringify(userDetails, null, 2)}
 
