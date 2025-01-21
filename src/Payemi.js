@@ -1,3 +1,5 @@
+
+
 import express from "express";
 import Razorpay from "razorpay";
 import crypto from "crypto";
@@ -27,7 +29,9 @@ const razorpay = new Razorpay({
 // Function to send emails
 const sendEmails = async (userDetails, paymentMethod, amount, planId) => {
   const transporter = nodemailer.createTransport({
-    service: "gmail", // Replace with your email service
+    host: "smtp.hostinger.com", // Hostinger's SMTP server
+    port: 465, // Use 465 for SSL or 587 for TLS
+    secure: true, // Set to true for port 465 // Replace with your email service
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
@@ -38,14 +42,27 @@ const sendEmails = async (userDetails, paymentMethod, amount, planId) => {
     from: process.env.EMAIL_USER,
     to: userDetails.email,
     subject: "Payment Confirmation",
-    text: `Dear ${userDetails.name},
-
-Your payment of ₹${amount * 100} for plan ID: ${planId} using ${paymentMethod} has been successful.
-
-Thank you for your purchase!
-
-Best regards,
-EMI Payment Team`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px;">
+        <h1 style="color: #4CAF50; text-align: center;">Payment Confirmation</h1>
+        <p style="text-align: center; font-size: 1.2rem; color: #333;">Thank you for your payment!</p>
+        <hr style="border: 1px solid #ddd; margin: 20px 0;">
+        <p style="font-size: 1rem; color: #555;">Dear <strong>${userDetails.name}</strong>,</p>
+        <p style="font-size: 1rem; color: #555;">We have successfully received your payment. Here are the details:</p>
+        <ul style="list-style: none; padding: 0; font-size: 1rem; color: #555;">
+          <li style="padding: 5px 0;"><strong>Plan ID:</strong> ${planId}</li>
+          <li style="padding: 5px 0; background-color: #f9f9f9;"><strong>Payment Method:</strong> ${paymentMethod}</li>
+          <li style="padding: 5px 0;"><strong>Amount Paid:</strong> ₹${amount * 100}</li>
+        </ul>
+        <p style="font-size: 1rem; color: #555; text-align: center; margin-top: 20px;">
+          If you have any questions, feel free to contact us at <a href="mailto:contact@vahlayastro.com" style="color: #4CAF50;">contact@vahlayastro.com</a>.
+        </p>
+        <p style="text-align: center; font-size: 1rem; color: #777;">
+          Warm regards,<br>
+          <strong>EMI Payment Team</strong>
+        </p>
+      </div>
+    `,
   };
 
   const adminMailOptions = {
@@ -55,7 +72,7 @@ EMI Payment Team`,
     text: `A new payment has been received:
 
 Payment Method: ${paymentMethod}
-Amount: ₹${amount * 100}
+Amount: ₹${amount / 100}
 Plan ID: ${planId}
 User Details: ${JSON.stringify(userDetails, null, 2)}
 
