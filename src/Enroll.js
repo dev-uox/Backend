@@ -1,6 +1,7 @@
 
 
 
+
 import express from "express";
 import Razorpay from "razorpay";
 import crypto from "crypto";
@@ -48,7 +49,7 @@ const sendEmails = async (userDetails, paymentMethod, amount, courseId) => {
           <p style="text-align: center; font-size: 1.2rem; color: #333;">Thank you for your payment!</p>
           <hr style="border: 1px solid #ddd; margin: 20px 0;">
           <p style="font-size: 1rem; color: #555;">
-            Dear <strong>${donorName}</strong>,
+            Dear <strong>${userDetails.name}</strong>,
           </p>
           <p style="font-size: 1rem; color: #555;">
             We are excited to confirm your payment of <strong>₹${amount * 100}</strong> for the course ID <strong>${razorpay_order_id}</strong>.
@@ -59,11 +60,11 @@ const sendEmails = async (userDetails, paymentMethod, amount, courseId) => {
           <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
             <tr style="background-color: #f9f9f9;">
               <th style="text-align: left; padding: 8px; border: 1px solid #ddd;">Payment ID</th>
-              <td style="padding: 8px; border: 1px solid #ddd;">${razorpay_payment_id}</td>
+              <td style="padding: 8px; border: 1px solid #ddd;">${paymentMethod}</td>
             </tr>
             <tr>
               <th style="text-align: left; padding: 8px; border: 1px solid #ddd;">Order ID</th>
-              <td style="padding: 8px; border: 1px solid #ddd;">${razorpay_order_id}</td>
+              <td style="padding: 8px; border: 1px solid #ddd;">${courseId}</td>
             </tr>
             <tr style="background-color: #f9f9f9;">
               <th style="text-align: left; padding: 8px; border: 1px solid #ddd;">Payment Method</th>
@@ -167,6 +168,7 @@ router.post("/paypal/success", async (req, res) => {
 });
 
 export default router;
+
 
 
 
