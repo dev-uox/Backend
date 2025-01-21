@@ -40,7 +40,7 @@ const sendEmails = async (userDetails, paymentMethod, amount, planId) => {
     subject: "Payment Confirmation",
     text: `Dear ${userDetails.name},
 
-Your payment of ₹${amount / 100} for plan ID: ${planId} using ${paymentMethod} has been successful.
+Your payment of ₹${amount * 100} for plan ID: ${planId} using ${paymentMethod} has been successful.
 
 Thank you for your purchase!
 
@@ -55,7 +55,7 @@ EMI Payment Team`,
     text: `A new payment has been received:
 
 Payment Method: ${paymentMethod}
-Amount: ₹${amount / 100}
+Amount: ₹${amount * 100}
 Plan ID: ${planId}
 User Details: ${JSON.stringify(userDetails, null, 2)}
 
