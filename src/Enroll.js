@@ -1,4 +1,6 @@
 
+
+
 import express from "express";
 import Razorpay from "razorpay";
 import crypto from "crypto";
@@ -27,7 +29,9 @@ const razorpay = new Razorpay({
 // Function to send emails
 const sendEmails = async (userDetails, paymentMethod, amount, courseId) => {
   const transporter = nodemailer.createTransport({
-    service: "gmail", // Replace with your email service
+    host: "smtp.hostinger.com", // Hostinger's SMTP server
+    port: 465, // Use 465 for SSL or 587 for TLS
+    secure: true, // Set to true for port 465 // Replace with your email service
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
@@ -37,17 +41,48 @@ const sendEmails = async (userDetails, paymentMethod, amount, courseId) => {
   const userMailOptions = {
     from: process.env.EMAIL_USER,
     to: userDetails.email,
-    subject: "Payment Confirmation",
-    text: `Dear ${userDetails.name},
-
-Your payment of ₹${amount * 100} for course ID: ${courseId} using ${paymentMethod} has been successful.
-
-Feel free to reach out us at contact@vahlayastro.com
-
-Thank you for your purchase!
-
-Best regards,
-Astrology Course Team`,
+    subject: "Payment Receipt - Astrology Course",
+   html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px;">
+          <h1 style="color: #4CAF50; text-align: center;">Astrology Course</h1>
+          <p style="text-align: center; font-size: 1.2rem; color: #333;">Thank you for your payment!</p>
+          <hr style="border: 1px solid #ddd; margin: 20px 0;">
+          <p style="font-size: 1rem; color: #555;">
+            Dear <strong>${donorName}</strong>,
+          </p>
+          <p style="font-size: 1rem; color: #555;">
+            We are excited to confirm your payment of <strong>₹${amount * 100}</strong> for the course ID <strong>${razorpay_order_id}</strong>.
+          </p>
+          <p style="font-size: 1rem; color: #555;">
+            Below are your payment details:
+          </p>
+          <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+            <tr style="background-color: #f9f9f9;">
+              <th style="text-align: left; padding: 8px; border: 1px solid #ddd;">Payment ID</th>
+              <td style="padding: 8px; border: 1px solid #ddd;">${razorpay_payment_id}</td>
+            </tr>
+            <tr>
+              <th style="text-align: left; padding: 8px; border: 1px solid #ddd;">Order ID</th>
+              <td style="padding: 8px; border: 1px solid #ddd;">${razorpay_order_id}</td>
+            </tr>
+            <tr style="background-color: #f9f9f9;">
+              <th style="text-align: left; padding: 8px; border: 1px solid #ddd;">Payment Method</th>
+              <td style="padding: 8px; border: 1px solid #ddd;">Razorpay</td>
+            </tr>
+            <tr>
+              <th style="text-align: left; padding: 8px; border: 1px solid #ddd;">Amount Paid</th>
+              <td style="padding: 8px; border: 1px solid #ddd;">₹${amount / 100}</td>
+            </tr>
+          </table>
+          <p style="font-size: 1rem; color: #555; text-align: center; margin-top: 20px;">
+            If you have any questions, feel free to contact us at <strong>contact@vahlayastro.com</strong>.
+          </p>
+          <p style="text-align: center; font-size: 1rem; color: #777;">
+            Warm regards,<br>
+            <strong>Astrology Course Team</strong>
+          </p>
+        </div>
+      `,
   };
 
   const adminMailOptions = {
@@ -132,5 +167,8 @@ router.post("/paypal/success", async (req, res) => {
 });
 
 export default router;
+
+
+
 
 
