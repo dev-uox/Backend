@@ -62,7 +62,7 @@ const paidAmount = amount && !isNaN(amount) ? `₹${(amount / 100).toFixed(2)}` 
           </tr>
           <tr>
             <th style="text-align: left; padding: 8px; border: 1px solid #ddd; background-color: #f2f2f2;">Amount Paid</th>
-            <td style="padding: 8px; border: 1px solid #ddd;">${paidAmount*100}</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">${paidAmount}</td>
           </tr>
           <tr>
             <th style="text-align: left; padding: 8px; border: 1px solid #ddd;">Payment Method</th>
@@ -101,7 +101,7 @@ const paidAmount = amount && !isNaN(amount) ? `₹${(amount / 100).toFixed(2)}` 
           </tr>
           <tr>
             <th style="text-align: left; padding: 8px; border: 1px solid #ddd; background-color: #f2f2f2;">Amount Paid</th>
-            <td style="padding: 8px; border: 1px solid #ddd;">${paidAmount*100}</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">${paidAmount}</td>
           </tr>
           <tr>
             <th style="text-align: left; padding: 8px; border: 1px solid #ddd;">Payment Method</th>
