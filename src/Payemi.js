@@ -32,7 +32,7 @@ const sendEmails = async (userDetails, paymentMethod, amount, planId, orderId) =
   const customerEmail = userDetails?.email || "No email provided";
   const plan = planId || "Not Available";
   const order = orderId || "Not Available";
-  const paidAmount = amount ? `₹${amount}` : "Unknown";
+  const paidAmount = amount ? `₹${amount * 100 }` : "Unknown";
 
   const transporter = nodemailer.createTransport({
     service: "gmail",
