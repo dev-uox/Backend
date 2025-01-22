@@ -1,6 +1,4 @@
 
-
-
 import express from "express";
 import paymentRoutes from "./Enroll.js";
 import Payemi from "./Payemi.js";
@@ -14,7 +12,7 @@ app.use(cors())
 
 app.use(express.json());
 app.use("/api/payment", paymentRoutes);
-app.use("/api/payment", Payemi);
+app.use("/api/emi", Payemi);
 app.use("/api/payment", Finalize);
 app.use("/api", Reminder);
 
