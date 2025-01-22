@@ -32,9 +32,8 @@ const sendEmails = async (userDetails, paymentMethod, amount, planId, orderId) =
   const customerEmail = userDetails?.email || "No email provided";
   const plan = planId || "Not Available";
   const order = orderId || "Not Available";
-  const paidAmount = amount && !isNaN(amount) 
-    ? (amount > 1000 ? `₹${amount}` : `₹${(amount / 100).toFixed(2)}`) 
-    : "Not Available";  
+  const paidAmount = amount * 100
+  
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
