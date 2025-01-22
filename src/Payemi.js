@@ -14,7 +14,7 @@ const app = express();
 // Enable CORS
 app.use(
   cors({
-    origin: "http://localhost:5173", // Replace with your frontend origin
+    origin: ["http://localhost:5173","https://vahlayastro.com"], // Replace with your frontend origin
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type"],
   })
@@ -32,8 +32,8 @@ const sendEmails = async (userDetails, paymentMethod, amount, planId, orderId) =
   const customerEmail = userDetails?.email || "No email provided";
   const plan = planId || "Not Available";
   const order = orderId || "Not Available";
-  const paidAmount = amount ? `₹${amount * 100 }` : "Unknown";
-
+const paidAmount = amount && !isNaN(amount) ? `₹${(amount / 100).toFixed(2)}` : "Not Available";
+  
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
