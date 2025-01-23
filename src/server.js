@@ -13,7 +13,7 @@ app.use(cors())
 app.use(express.json());
 app.use("/api/payment", paymentRoutes);
 app.use("/api/emi", Payemi);
-app.use("/api/payment", Finalize);
+app.use("/api/final", Finalize);
 app.use("/api", Reminder);
 
 
