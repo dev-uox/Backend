@@ -1,6 +1,8 @@
 
 
 
+
+
 import express from "express";
 import Razorpay from "razorpay";
 import crypto from "crypto";
@@ -28,6 +30,8 @@ const razorpay = new Razorpay({
 
 // Function to send emails
 const sendEmails = async (userDetails, paymentMethod, amount, courseId) => {
+  const formattedAmount = paymentMethod === "Razorpay" ? amount/100 : amount ;
+
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -49,7 +53,7 @@ const sendEmails = async (userDetails, paymentMethod, amount, courseId) => {
           Dear <strong>${userDetails.name}</strong>,
         </p>
         <p style="font-size: 1rem; color: #555;">
-          We are delighted to confirm your payment of <strong>₹${amount.toFixed(2)}</strong> for the course <strong>${courseId}</strong>.
+          We are delighted to confirm your payment of <strong>₹${formattedAmount}</strong> for the course <strong>${courseId}</strong>.
         </p>
         <table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 1rem;">
           <tr style="background-color: #e9f5e9;">
@@ -66,7 +70,7 @@ const sendEmails = async (userDetails, paymentMethod, amount, courseId) => {
           </tr>
           <tr>
             <th style="text-align: left; padding: 10px; border: 1px solid #ddd;">Amount Paid</th>
-            <td style="padding: 10px; border: 1px solid #ddd;">₹${amount.toFixed(2)}</td>
+            <td style="padding: 10px; border: 1px solid #ddd;">₹${formattedAmount}</td>
           </tr>
         </table>
         <p style="font-size: 1rem; color: #555; text-align: center; margin-top: 20px;">
@@ -95,7 +99,7 @@ const sendEmails = async (userDetails, paymentMethod, amount, courseId) => {
           </tr>
           <tr>
             <th style="text-align: left; padding: 10px; border: 1px solid #ddd;">Amount</th>
-            <td style="padding: 10px; border: 1px solid #ddd;">₹${amount.toFixed(2)}</td>
+            <td style="padding: 10px; border: 1px solid #ddd;">₹${formattedAmount}</td>
           </tr>
           <tr style="background-color: #f9f9f9;">
             <th style="text-align: left; padding: 10px; border: 1px solid #ddd;">Course Name</th>
@@ -199,8 +203,6 @@ router.post("/paypal/success", async (req, res) => {
 });
 
 export default router;
-
-
 
 
 
