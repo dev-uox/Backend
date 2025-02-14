@@ -36,10 +36,7 @@ const PORT = process.env.PORT || 5000;
 // Log before starting the server
 console.log("🚀 Server is starting...");
 
-app.use((req, res, next) => {
-  console.log(`🔍 Incoming Request: ${req.method} ${req.url}`);
-  next();
-});
+
 
 
 // Start Express Server
