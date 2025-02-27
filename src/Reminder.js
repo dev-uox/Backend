@@ -16,20 +16,20 @@ router.post('/send-email', async (req, res) => {
   const { recipientEmail, subject, message } = req.body;
 
   try {
-   const transporter = nodemailer.createTransport({
-     service: "gmail",
-     auth: {
-       user: process.env.EMAIL_USER,
-       pass: process.env.EMAIL_PASS,
-     },
-   });
-   
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
 
     const mailOptions = {
       from: process.env.EMAIL_USER, // Replace with your email
       to: recipientEmail,
       subject,
-      text: message,
+      html: message,
     };
 
     await transporter.sendMail(mailOptions);
@@ -41,3 +41,4 @@ router.post('/send-email', async (req, res) => {
 });
 
 export default router
+
