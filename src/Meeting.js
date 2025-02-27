@@ -1,85 +1,147 @@
 
 
 import express from "express";
-import { SDK as RC } from "@ringcentral/sdk";
+import cors from "cors";
 import dotenv from "dotenv";
+import { SDK as RC } from "@ringcentral/sdk";
 
 dotenv.config();
 
+const app = express();
 const router = express.Router();
+const PORT = process.env.PORT || 5000;
 
-console.log("🔹 Debugging .env values:");
-console.log("RC_SERVER_URL:", process.env.RC_SERVER_URL);
-console.log("RC_APP_CLIENT_ID:", process.env.RC_APP_CLIENT_ID ? "✅ Loaded" : "❌ MISSING");
-console.log("RC_APP_CLIENT_SECRET:", process.env.RC_APP_CLIENT_SECRET ? "✅ Loaded" : "❌ MISSING");
-console.log("RC_USER_JWT:", process.env.RC_USER_JWT ? "✅ Loaded" : "❌ MISSING");
+app.use(cors());
+app.use(express.json());
 
 
-// Instantiate the SDK
 const rcsdk = new RC({
     server: process.env.RC_SERVER_URL,
     clientId: process.env.RC_APP_CLIENT_ID,
-    clientSecret: process.env.RC_APP_CLIENT_SECRET
+    clientSecret: process.env.RC_APP_CLIENT_SECRET,
+    jwt: process.env.RC_USER_JWT // Add JWT directly to config
 });
-const platform = rcsdk.platform();
 
-// 🔹 Authenticate Route (Fixed: Removed `/meeting/` prefix)
-router.get("/authenticate", async (req, res) => {
+// Simplified authentication
+const authenticate = async () => {
     try {
-        console.log("🔹 Authenticating user...");
-        await platform.login({ jwt: process.env.RC_USER_JWT });
-
-        // Fetch user info to check admin permissions
-        const userInfo = await platform.get("/restapi/v1.0/account/~/extension/~");
-        const userData = await userInfo.json();
-        console.log("✅ Authenticated User:", userData);
-
-        if (!userData.permissions || !userData.permissions.includes("Video")) {
-            throw new Error("❌ User does not have necessary video permissions");
-        }
-
-        console.log("✅ RingCentral Authentication Successful!");
-        res.status(200).json({ message: "Authentication Successful" });
+        // Force fresh JWT authentication
+        await platform.login({
+            jwt: process.env.RC_USER_JWT,
+            access_token_ttl: 3600 // 1 hour token validity
+        });
+        return platform.auth().data().access_token;
     } catch (e) {
-        console.error("❌ Authentication Failed:", e.message);
-        res.status(500).json({ error: `Authentication Failed: ${e.message}` });
+        console.error("Auth Error:", {
+            code: e.response?.statusCode,
+            apiError: e.response?.data
+        });
+        throw new Error("Authentication failed: Verify JWT validity");
     }
-});
+};
+// Retry Wrapper for API Calls
+const withRetry = async (fn, retries = 3, delay = 1000) => {
+    try {
+        return await fn();
+    } catch (e) {
+        if (retries > 0 && e.response?.status >= 500) {
+            await new Promise(res => setTimeout(res, delay));
+            return withRetry(fn, retries - 1, delay * 2);
+        }
+        throw e;
+    }
+};
 
-
-// 🔹 Create Meeting Route (Fixed: Removed `/meeting/` prefix)
+// Create Meeting Endpoint
 router.post("/create", async (req, res) => {
     try {
-        await platform.login({ jwt: process.env.RC_USER_JWT });
-
-        const endpoint = "/rcvideo/v2/account/~/extension/~/bridges";
-        const bodyParams = {
+        const token = await authenticate();
+        
+        const meetingConfig = {
             name: "Admin Controlled Meeting",
             type: "Scheduled",
             settings: {
-                waitingRoomRequired: true,
-                hostJoinedRequired: true,
-                joinBeforeHost: false
+                security: {
+                    waitingRoomRequired: true,
+                    waitingRoomMode: "Everyone",
+                    authentication: "Public"
+                },
+                host: {
+                    joinBeforeHost: false,
+                    screenSharing: true,
+                    muteParticipantsOnEntry: true
+                },
+                recording: {
+                    enabled: true,
+                    autoStart: true,
+                    accountUserAccess: true
+                },
+                participants: {
+                    allowJoinBeforeHost: false,
+                    publishOwnVideo: false
+                }
             }
         };
 
-        const response = await platform.post(endpoint, bodyParams);
-        if (!response.ok) {
-            throw new Error(`Grant Error: ${response.statusText}`);
-        }
+        const response = await withRetry(() => 
+            platform.post("/rcvideo/v2/account/~/extension/~/bridges", meetingConfig, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                timeout: 30000
+            })
+        );
 
-        const jsonObj = await response.json();
-        console.log("✅ Meeting Created:", jsonObj.discovery.web);
-        res.json({ meetingLink: jsonObj.discovery.web });
+        const meetingData = await response.json();
+        
+        res.json({
+            meetingLink: meetingData.discovery.web,
+            meetingId: meetingData.id,
+            expiration: new Date(Date.now() + 3600000) // 1 hour expiration
+        });
+
     } catch (e) {
-        console.error("❌ Error creating meeting:", e.message);
-        res.status(500).json({ error: "Unable to create meeting. Check API permissions." });
+        console.error("Meeting Creation Error:", {
+            message: e.message,
+            status: e.response?.status,
+            data: e.response?.data
+        });
+        
+        res.status(e.response?.status || 500).json({
+            error: "MEETING_CREATION_FAILED",
+            message: e.response?.data?.message || e.message
+        });
     }
 });
 
-export default router;  // ✅ Correct: Exporting `router`, not `app`
+// End Meeting Endpoint
+router.delete("/end/:meetingId", async (req, res) => {
+    try {
+        const token = await authenticate();
+        const { meetingId } = req.params;
+
+        await withRetry(() =>
+            platform.delete(`/rcvideo/v2/account/~/extension/~/bridges/${meetingId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+        );
+
+        res.json({ 
+            success: true,
+            message: "Meeting ended successfully"
+        });
+
+    } catch (e) {
+        res.status(e.response?.status || 500).json({
+            error: "MEETING_END_FAILED",
+            message: e.message
+        });
+    }
+});
 
 
 
-
-
+export default router
