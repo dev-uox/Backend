@@ -7,6 +7,7 @@ import Payemi from "./Payemi.js";
 import Finalize from "./Finalize.js";
 import Reminder from "./Reminder.js";
 import Meeting from "./Meeting.js";
+import Button from "./Button.js";
 
 const app = express();
 app.use(cors());
@@ -19,6 +20,8 @@ app.use("/api/emi", Payemi);
 app.use("/api/final", Finalize);
 app.use("/api", Reminder);
 app.use("/meeting", Meeting);
+app.use("/button", Button);
+
 
 
 // 🔹 Health Check Route
@@ -37,9 +40,7 @@ const PORT = process.env.PORT || 5000;
 console.log("🚀 Server is starting...");
 
 
-
-
-// Start Express Server
+  // Start Express Server
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
